@@ -7,9 +7,49 @@ from appwrite.client import Client
 from appwrite.query import Query 
 from appwrite.input_file import InputFile
 from schemes.photo import Photo
+from datetime import date
 import tempfile
 from auth.dependencies import get_appwrite_client
 import os
+
+def get_user_photos_by_month(
+    client,
+    user_id: str,
+    year: int,
+    month: int
+):
+    # Calcular rango de fechas
+    start_date = date(year, month, 1)
+
+    if month == 12:
+        end_date = date(year + 1, 1, 1)
+    else:
+        end_date = date(year, month + 1, 1)
+
+    databases = Databases(client)
+    collection_id = os.getenv("collect_id")
+    database_id = os.getenv("db_id")
+
+    queries = [
+        Query.equal("user_id", user_id),
+        Query.greater_than_equal("day", start_date.isoformat()),
+        Query.less_than("day", end_date.isoformat())
+    ]
+
+    try:
+        response = databases.list_documents(
+            database_id=database_id,
+            collection_id=collection_id,
+            queries=queries
+        )
+
+        return response["documents"]
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al listar fotos del usuario '{user_id}' para {year}-{month}: {str(e)}"
+        )
 
 def get_one_photo(client, doc_id: str):
     databases = Databases(client)
@@ -72,7 +112,7 @@ def create_photo(photo: Photo, client, user_id: str, file: UploadFile):
                 "location": photo.location,
                 "user_id": user_id,
                 "imagen_id": image_id,
-                "day": photo.day
+                "day": photo.day.isoformat() if photo.day else None
             }
         )
         return doc
@@ -94,6 +134,10 @@ def update_photo(doc_id: str, photo: Photo, client, user_id: str, file: UploadFi
         key: value for key, value in photo_data_dict.items() 
         if value is not None and key != 'user_id'
     }
+        # Convertir day a string si viene en el update
+    if "day" in update_data and isinstance(update_data["day"], date):
+        update_data["day"] = update_data["day"].isoformat()
+
     
     image_id = None
     tmp_path = None
@@ -180,23 +224,3 @@ def delete_photo(client: Client, doc_id: str):
     except Exception as e:
         return {"status": "error", "detail": str(e)}
 
-def get_all_user_photos(client, user_id: str):
-    databases = Databases(client)
-    collection_id = os.getenv("collect_id")
-    database_id = os.getenv("db_id")
-    
-    queries = [
-        Query.equal("user_id", user_id),
-        # Puedes añadir más queries aquí, como ordenar por día (si tienes un índice)
-    ]
-    
-    try:
-        response = databases.list_documents(
-            database_id=database_id,
-            collection_id=collection_id,
-            queries=queries
-        )
-        return response['documents']
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al listar fotos del usuario '{user_id}': {str(e)}")
