@@ -1,7 +1,9 @@
 import { Box, Button, Typography, Link } from '@mui/material'
-import AuthLayout from "../components/layout/AuthLayout";
-import started from "../assets/started.png"
-import logo from "../assets/logo.png"
+import { Link as RouterLink } from 'react-router-dom'
+import AuthLayout from '../components/layout/AuthLayout'
+import started from '../assets/started.png'
+import logo from '../assets/logo.png'
+
 export default function GetStarted() {
   return (
     <AuthLayout>
@@ -11,17 +13,14 @@ export default function GetStarted() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          bgcolor: '#FFF',
+          bgcolor: 'background.paper',
         }}
       >
         <Box
           component="img"
-          src={started}   // pon aquí tu imagen
+          src={started}
           alt="Calendar illustration"
-          sx={{
-            maxWidth: '85%',
-            height: 'auto',
-          }}
+          sx={{ maxWidth: '85%' }}
         />
       </Box>
 
@@ -34,10 +33,9 @@ export default function GetStarted() {
           justifyContent: 'center',
         }}
       >
-        {/* Logo */}
         <Box
           component="img"
-          src={logo}// tu logo
+          src={logo}
           alt="Suntsy logo"
           sx={{ width: 144, mb: 3 }}
         />
@@ -46,25 +44,19 @@ export default function GetStarted() {
           Let’s get started
         </Typography>
 
-        <Typography color='#0000000' sx={{ mb: 4 }}>
+        <Typography color="text.secondary" sx={{ mb: 4, maxWidth: 420 }}>
           Save your favorite sky photos, share them with friends, and relive
           your memories through Suntsy, your personal sky tracker calendar.
         </Typography>
 
+        {/* BOTÓN CORRECTO */}
         <Button
-          variant="contained"
+          variant="suntsy"
+          component={RouterLink}
+          to="/signup"
           sx={{
-            bgcolor: '#D59A9A',
-            color: '#ffffff',
             mb: 2,
-            py: 1.2,
-            borderRadius: 2,
-            boxShadow: 'none',
-            textTransform: 'none',
-            '&:hover': {
-              bgcolor: '#C48888',
-              boxShadow: 'none',
-            },
+            fontSize: '20px', // Figma
           }}
         >
           Get started
@@ -72,7 +64,7 @@ export default function GetStarted() {
 
         <Typography variant="body2" color="text.secondary">
           Already have an account?{' '}
-          <Link href="/login" underline="hover">
+          <Link component={RouterLink} to="/login" underline="hover">
             Log in
           </Link>
         </Typography>
